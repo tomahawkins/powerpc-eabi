@@ -1,0 +1,7 @@
+128c128
+< XIL_OBJS	= open.o close.o lseek.o sbrk.o read.o write.o print.o xil-exit.o
+---
+> XIL_OBJS	= open.o close.o lseek.o sbrk.o read.o write.o print.o
+315,316d314
+< xil-exit.o: xil-exit.c
+< 

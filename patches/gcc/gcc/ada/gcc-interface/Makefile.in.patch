@@ -1,0 +1,8 @@
+383,384c383
+< GNATRTL_SOCKETS_OBJS = g-soccon$(objext) g-socket$(objext) g-socthi$(objext) \
+<   g-soliop$(objext) g-sothco$(objext) g-sttsne$(objext)
+---
+> GNATRTL_SOCKETS_OBJS =
+394a394,395
+> LIBGNAT_TARGET_PAIRS += $(DUMMY_SOCKETS_TARGET_PAIRS)
+> 

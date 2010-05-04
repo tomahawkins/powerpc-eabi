@@ -1,0 +1,7 @@
+39,40d38
+< #include <dirent.h>
+< 
+84,86d81
+< extern DIR   *__gnat_opendir                       (char *);
+< extern char  *__gnat_readdir                       (DIR *, char *, int *);
+< extern int    __gnat_closedir                      (DIR *);

@@ -1,0 +1,87 @@
+1043,1128d1042
+< /*  Open directory and returns a DIR pointer.  */
+< 
+< DIR* __gnat_opendir (char *name)
+< {
+< #if defined (RTX)
+<   /* Not supported in RTX */
+< 
+<   return NULL;
+< 
+< #elif defined (__MINGW32__)
+<   TCHAR wname[GNAT_MAX_PATH_LEN];
+< 
+<   S2WSU (wname, name, GNAT_MAX_PATH_LEN);
+<   return (DIR*)_topendir (wname);
+< 
+< #else
+<   return opendir (name);
+< #endif
+< }
+< 
+< /* Read the next entry in a directory.  The returned string points somewhere
+<    in the buffer.  */
+< 
+< char *
+< __gnat_readdir (DIR *dirp, char *buffer, int *len)
+< {
+< #if defined (RTX)
+<   /* Not supported in RTX */
+< 
+<   return NULL;
+< 
+< #elif defined (__MINGW32__)
+<   struct _tdirent *dirent = _treaddir ((_TDIR*)dirp);
+< 
+<   if (dirent != NULL)
+<     {
+<       WS2SU (buffer, dirent->d_name, GNAT_MAX_PATH_LEN);
+<       *len = strlen (buffer);
+< 
+<       return buffer;
+<     }
+<   else
+<     return NULL;
+< 
+< #elif defined (HAVE_READDIR_R)
+<   /* If possible, try to use the thread-safe version.  */
+<   if (readdir_r (dirp, buffer) != NULL)
+<     {
+<       *len = strlen (((struct dirent*) buffer)->d_name);
+<       return ((struct dirent*) buffer)->d_name;
+<     }
+<   else
+<     return NULL;
+< 
+< #else
+<   struct dirent *dirent = (struct dirent *) readdir (dirp);
+< 
+<   if (dirent != NULL)
+<     {
+<       strcpy (buffer, dirent->d_name);
+<       *len = strlen (buffer);
+<       return buffer;
+<     }
+<   else
+<     return NULL;
+< 
+< #endif
+< }
+< 
+< /* Close a directory entry.  */
+< 
+< int __gnat_closedir (DIR *dirp)
+< {
+< #if defined (RTX)
+<   /* Not supported in RTX */
+< 
+<   return 0;
+< 
+< #elif defined (__MINGW32__)
+<   return _tclosedir ((_TDIR*)dirp);
+< 
+< #else
+<   return closedir (dirp);
+< #endif
+< }
+< 
