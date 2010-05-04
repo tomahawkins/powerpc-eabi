@@ -2,7 +2,8 @@
 # Must remove '.' from path before starting.  Causes gcc to reference a local 'as', which is the wrong assembler.
 # Requires same GGC version as build machine.
 
-PREFIX=/usr/local
+PREFIX=/tools/share/powerpc-eabi
+#PREFIX=/usr/local
 HOST=i686-pc-linux-gnu
 TARGET=powerpc-eabi
 
@@ -15,18 +16,8 @@ NEWLIB=1.18.0
 
 MIRROR=http://astromirror.uchicago.edu/gnu
 
-#INSTALLER =
-INSTALLER = sudo
-
-TARBALLS = \
-  binutils-$(BINUTILS).tar.gz \
-  gcc-core-$(GCC).tar.gz \
-  gcc-ada-$(GCC).tar.gz \
-  gcc-g++-$(GCC).tar.gz \
-  gmp-$(GMP).tar.gz \
-  mpfr-$(MPFR).tar.gz \
-  mpc-$(MPC).tar.gz \
-  newlib-$(NEWLIB).tar.gz
+INSTALLER=
+#INSTALLER=sudo
 
 .PHONY: all
 all: build-binutils build-gcc1 build-newlib build-gcc2
