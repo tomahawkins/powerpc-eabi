@@ -182,8 +182,8 @@ gcc1-install.log: gcc1-make.log
 
 newlib-configure.log: $(NEWLIB_DIR) gcc1-install.log
 	mkdir -p build-newlib
-	echo NOT_USED: patch newlib-$(NEWLIB)/libgloss/rs6000/Makefile.in patches/newlib/libgloss/rs6000/Makefile.in.patch  # Apply patch to remove references to removed xil-exit.c file.
-	export PATH=$(PREFIX)/bin:$(PATH) && cd build-newlib && ../newlib-$(NEWLIB)/configure --prefix=$(PREFIX) --target=$(TARGET) --enable-languages=c,c++,ada 2>&1 | tee ../newlib-configure.log.tmp \
+	echo NOT_USED: patch newlib-$(NEWLIB_VER)/libgloss/rs6000/Makefile.in patches/newlib/libgloss/rs6000/Makefile.in.patch  # Apply patch to remove references to removed xil-exit.c file.
+	export PATH=$(PREFIX)/bin:$(PATH) && cd build-newlib && ../newlib-$(NEWLIB_VER)/configure --prefix=$(PREFIX) --target=$(TARGET) --enable-languages=c,c++,ada 2>&1 | tee ../newlib-configure.log.tmp \
 	&& mv ../newlib-configure.log.tmp ../newlib-configure.log
 
 newlib-make.log: newlib-configure.log
