@@ -1,9 +1,8 @@
 # Builds and installs GCC (c, c++, ada) for embedded PowerPC.
 # Must remove '.' from path before starting.  Causes gcc to reference a local 'as', which is the wrong assembler.
-# Requires same GGC version as build machine.
-
 PREFIX:=/tools/share/powerpc-eabi-amd64host
 TARGET:=powerpc-eabi
+PATH:=$(PREFIX)/bin:$(PATH)
 
 GCC_VER:=4.5.3
 BINUTILS_VER:=2.21
@@ -17,7 +16,6 @@ NEWLIB_VER:=1.19.0
 ENABLE_LANGUAGES:=c,c++
 
 #MIRROR=http://astromirror.uchicago.edu/gnu
-
 ## also located in illinois, but with more recent gcc versions
 MIRROR=ftp://mirror.team-cymru.org/gnu
 
@@ -154,57 +152,65 @@ GCC_CONFIG_OPTS:= \
     --disable-shared \
     --disable-libssp
 
+## NOTE: 'tee'ing output cause 'make' to continue even if the 
+##       command has failed.  In an effort to log the build, 
+##       the user loses the ability to see all the text fly
+##       by on the console screen.  Sorry.
 binutils-configure.log: $(BINUTILS_DIR)
-	cd $(BINUTILS_DIR) && ./configure --prefix=$(PREFIX) --target=$(TARGET) 2>&1 | tee ../binutils-configure.log.tmp \
-	&& mv ../binutils-configure.log.tmp ../binutils-configure.log
+	cd $(BINUTILS_DIR) \
+	&& ./configure --prefix=$(PREFIX) --target=$(TARGET) > ../binutils-configure.log.tmp 2>&1
+	mv binutils-configure.log.tmp binutils-configure.log
 
 binutils-make.log: binutils-configure.log
-	cd $(BINUTILS_DIR) && make all 2>&1 | tee ../binutils-make.log.tmp \
-	&& mv ../binutils-make.log.tmp ../binutils-make.log
+	$(MAKE) all -C $(BINUTILS_DIR) > binutils-make.log.tmp 2>&1
+	mv binutils-make.log.tmp binutils-make.log
 
 binutils-install.log: binutils-make.log
-	cd $(BINUTILS_DIR) && $(INSTALLER) make install 2>&1 | tee ../binutils-install.log.tmp \
-	&& mv ../binutils-install.log.tmp ../binutils-install.log
+	$(INSTALLER) $(MAKE) install -C $(BINUTILS_DIR) > binutils-install.log.tmp 2>&1
+	mv binutils-install.log.tmp binutils-install.log
 
 gcc1-configure.log: $(GCC_DIR) $(GCC_CPLUSPLUS_DIR) $(GCC_ADA_DIR) \
                   $(GMP_DIR) $(MPFR_DIR) $(MPC_DIR) binutils-install.log
 	mkdir -p build-gcc
-	cd build-gcc && ../$(GCC_DIR)/configure $(GCC_CONFIG_OPTS) --without-headers 2>&1 | tee ../gcc1-configure.log.tmp \
-	&& mv ../gcc1-configure.log.tmp ../gcc1-configure.log
+	cd build-gcc \
+	&& ../$(GCC_DIR)/configure $(GCC_CONFIG_OPTS) --without-headers > ../gcc1-configure.log.tmp 2>&1
+	mv gcc1-configure.log.tmp gcc1-configure.log
 
 gcc1-make.log: gcc1-configure.log
-	cd build-gcc && make all-gcc 2>&1 | tee ../gcc1-make.log.tmp \
-	&& mv ../gcc1-make.log.tmp ../gcc1-make.log
+	$(MAKE) all-gcc -C build-gcc > gcc1-make.log.tmp 2>&1
+	mv gcc1-make.log.tmp gcc1-make.log
 
 gcc1-install.log: gcc1-make.log
-	cd build-gcc && $(INSTALLER) make install-gcc 2>&1 | tee ../gcc1-install1.log.tmp \
-	&& mv ../gcc1-install1.log.tmp ../gcc1-install1.log
+	$(INSTALLER) $(MAKE) install-gcc -C build-gcc > gcc1-install.log.tmp 2>&1
+	mv gcc1-install.log.tmp gcc1-install.log
 
 newlib-configure.log: $(NEWLIB_DIR) gcc1-install.log
 	mkdir -p build-newlib
 	echo NOT_USED: patch newlib-$(NEWLIB_VER)/libgloss/rs6000/Makefile.in patches/newlib/libgloss/rs6000/Makefile.in.patch  # Apply patch to remove references to removed xil-exit.c file.
-	export PATH=$(PREFIX)/bin:$(PATH) && cd build-newlib && ../newlib-$(NEWLIB_VER)/configure --prefix=$(PREFIX) --target=$(TARGET) --enable-languages=c,c++,ada 2>&1 | tee ../newlib-configure.log.tmp \
-	&& mv ../newlib-configure.log.tmp ../newlib-configure.log
+	cd build-newlib \
+	&& ../newlib-$(NEWLIB_VER)/configure --prefix=$(PREFIX) --target=$(TARGET) --enable-languages=$(ENABLE_LANGUAGES) > ../newlib-configure.log.tmp 2>&1
+	mv newlib-configure.log.tmp newlib-configure.log 
 
 newlib-make.log: newlib-configure.log
-	export PATH=$(PREFIX)/bin:$(PATH) && cd build-newlib && make all 2>&1 | tee ../newlib-make.log.tmp \
-	&& mv ../newlib-make.log.tmp ../newlib-make.log
+	$(MAKE) all -C build-newlib > newlib-make.log.tmp 2>&1
+	mv newlib-make.log.tmp newlib-make.log
 
 newlib-install.log: newlib-make.log
-	export PATH=$(PREFIX)/bin:$(PATH) && cd build-newlib && $(INSTALLER) make install 2>&1 | tee ../newlib-install.log.tmp \
-	&& mv ../newlib-install.log.tmp ../newlib-install.log
+	$(INSTALLER) $(MAKE) install -C build-newlib > newlib-install.log.tmp 2>&1
+	mv newlib-install.log.tmp newlib-install.log
 
 gcc2-configure.log: newlib-install.log
-	cd build-gcc && ../$(GCC_DIR)/configure $(GCC_CONFIG_OPTS) 2>&1 | tee ../gcc2-configure.log.tmp \
-	&& mv ../gcc2-configure.log.tmp ../gcc2-configure.log
+	cd build-gcc \
+	&& ../$(GCC_DIR)/configure $(GCC_CONFIG_OPTS) > ../gcc2-configure.log.tmp 2>&1
+	mv gcc2-configure.log.tmp gcc2-configure.log
 
 gcc2-make.log: gcc2-configure.log
-	cd build-gcc && make all 2>&1 | tee ../gcc2-make.log.tmp \
-	&& mv ../gcc2-make.log.tmp ../gcc2-make.log
+	$(MAKE) all -C build-gcc > gcc2-make.log.tmp 2>&1
+	mv gcc2-make.log.tmp gcc2-make.log
 
 gcc2-install.log: gcc2-make.log
-	cd build-gcc && make $(INSTALLER) install 2>&1 | tee ../gcc2-install.log.tmp \
-	&& mv ../gcc2-install.log.tmp ../gcc2-install.log
+	$(INSTALLER) $(MAKE) install -C build-gcc > gcc2-install.log.tmp 2>&1
+	mv gcc2-install.log.tmp gcc2-install.log
 
 .PHONY: clean
 clean:
