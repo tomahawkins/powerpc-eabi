@@ -16,6 +16,14 @@ NEWLIB_VER:=1.19.0
 ## NOTE: fortran not allowed (yet)
 ENABLE_LANGUAGES:=c,c++
 
+#MIRROR=http://astromirror.uchicago.edu/gnu
+
+## also located in illinois, but with more recent gcc versions
+MIRROR=ftp://mirror.team-cymru.org/gnu
+
+INSTALLER=
+#INSTALLER=sudo
+
 ## turn off old-fashioned implicit rules
 .SUFFIXES:
 
@@ -145,14 +153,6 @@ GCC_CONFIG_OPTS:= \
     --disable-nls \
     --disable-shared \
     --disable-libssp
-
-#MIRROR=http://astromirror.uchicago.edu/gnu
-
-## also located in illinois, but with more recent gcc versions
-MIRROR=ftp://mirror.team-cymru.org/gnu
-
-INSTALLER=
-#INSTALLER=sudo
 
 binutils-configure.log: $(BINUTILS_DIR)
 	cd $(BINUTILS_DIR) && ./configure --prefix=$(PREFIX) --target=$(TARGET) 2>&1 | tee ../binutils-configure.log.tmp \
