@@ -1,0 +1,29 @@
+#!/bin/sh
+
+FTP_HOST=sources.redhat.com
+FTP_USER=anonymous
+FTP_PASSWD=anonymous@anonymous.com
+
+ftp_session() {
+	FTP_ACTION=$1
+	FTP_LOCAL_DIR=$2
+	FTP_REMOTE_DIR=$3
+	FTP_FILE=$4
+	START_DIR=`pwd`
+	cd $FTP_LOCAL_DIR
+	echo "`date`: $FTP_ACTION" $FTP_LOCAL_DIR/$FTP_FILE
+	ftp -nv <<EOT
+open $FTP_HOST
+user $FTP_USER $FTP_PASSWD
+cd $FTP_REMOTE_DIR
+$FTP_ACTION $FTP_FILE
+bye
+EOT
+}
+
+ftp_session get . pub/newlib $1 | tee get_newlib.log
+grep '^226' get_newlib.log > /dev/null
+STATUS=$?
+rm get_newlib.log
+return $STATUS
+

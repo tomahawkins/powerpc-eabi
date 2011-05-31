@@ -1,9 +1,5 @@
-# Builds and installs GCC (c, c++, ada) for embedded PowerPC.
+# Builds and installs GCC (c, c++, ada for embedded PowerPC.
 # Must remove '.' from path before starting.  Causes gcc to reference a local 'as', which is the wrong assembler.
-PREFIX:=/tools/share/powerpc-eabi-amd64host
-TARGET:=powerpc-eabi
-PATH:=$(PREFIX)/bin:$(PATH)
-
 GCC_VER:=4.5.3
 BINUTILS_VER:=2.21
 GMP_VER:=5.0.2
@@ -15,9 +11,40 @@ NEWLIB_VER:=1.19.0
 ## NOTE: fortran not allowed (yet)
 ENABLE_LANGUAGES:=c,c++
 
+
+## NOTE: tried ftp mirror, but wget and ftp doesn't work well
+## from inside corporate network
+##################
+#   ftp mirrors  #
+##################
+## mirror location: illinois usa
+#MIRROR=ftp://mirror.team-cymru.org/gnu
+
+##################
+#  http mirrors  #
+##################
+## mirror location: bangladesh
+#MIRROR=http://mirrors.ispros.com.db/gnu
+
+## mirror location: illinois usa
 #MIRROR=http://astromirror.uchicago.edu/gnu
-## also located in illinois, but with more recent gcc versions
-MIRROR=ftp://mirror.team-cymru.org/gnu
+
+## mirror location: illinois usa
+MIRROR=http://mirror.team-cymru.org/gnu
+
+## mirror location: pakistan
+#MIRROR:=http://mirror-cybernet.lums.edu.pk/pub/gnu
+
+## mirror location: taiwan
+#MIRROR=http://ftp.twaren.net/unix/gnu/gnu
+
+UNAME:=$(shell uname -a)
+ifeq ($(findstring x86_64,$(UNAME)), x86_64)
+CROSSTOOL_SUFFIX:=-x86_64
+endif
+PREFIX:=/tools/share/powerpc-eabi-$(GCC_VER)$(CROSSTOOL_SUFFIX)
+TARGET:=powerpc-eabi
+PATH:=$(PREFIX)/bin:$(PATH)
 
 INSTALLER=
 #INSTALLER=sudo
@@ -84,11 +111,14 @@ $(MPC_DIR): $(MPC_TARBALL)
 ############
 #  newlib  #
 ############
+## NOTE: wget and ftp don't work well behind corporate proxy.
+##       newlib is only available via ftp.  So... we must call
+##       an old-school ftp script to get the tarball
 NEWLIB_DIR:=newlib-$(NEWLIB_VER)
 NEWLIB_TARBALL:=newlib-$(NEWLIB_VER).tar.gz
 
 $(NEWLIB_TARBALL):
-	wget ftp://sources.redhat.com/pub/newlib/$@
+	./get_newlib $@
 
 $(NEWLIB_DIR): $(NEWLIB_TARBALL)
 	echo $(NEWLIB_DIR)
@@ -158,59 +188,59 @@ GCC_CONFIG_OPTS:= \
 ##       by on the console screen.  Sorry.
 binutils-configure.log: $(BINUTILS_DIR)
 	cd $(BINUTILS_DIR) \
-	&& ./configure --prefix=$(PREFIX) --target=$(TARGET) > ../binutils-configure.log.tmp 2>&1
-	mv binutils-configure.log.tmp binutils-configure.log
+	&& ./configure --prefix=$(PREFIX) --target=$(TARGET) > ../binutils-configure.tmp.log 2>&1
+	mv binutils-configure.tmp.log binutils-configure.log
 
 binutils-make.log: binutils-configure.log
-	$(MAKE) all -C $(BINUTILS_DIR) > binutils-make.log.tmp 2>&1
-	mv binutils-make.log.tmp binutils-make.log
+	$(MAKE) all -C $(BINUTILS_DIR) > binutils-make.tmp.log 2>&1
+	mv binutils-make.tmp.log binutils-make.log
 
 binutils-install.log: binutils-make.log
-	$(INSTALLER) $(MAKE) install -C $(BINUTILS_DIR) > binutils-install.log.tmp 2>&1
-	mv binutils-install.log.tmp binutils-install.log
+	$(INSTALLER) $(MAKE) install -C $(BINUTILS_DIR) > binutils-install.tmp.log 2>&1
+	mv binutils-install.tmp.log binutils-install.log
 
 gcc1-configure.log: $(GCC_DIR) $(GCC_CPLUSPLUS_DIR) $(GCC_ADA_DIR) \
                   $(GMP_DIR) $(MPFR_DIR) $(MPC_DIR) binutils-install.log
 	mkdir -p build-gcc
 	cd build-gcc \
-	&& ../$(GCC_DIR)/configure $(GCC_CONFIG_OPTS) --without-headers > ../gcc1-configure.log.tmp 2>&1
-	mv gcc1-configure.log.tmp gcc1-configure.log
+	&& ../$(GCC_DIR)/configure $(GCC_CONFIG_OPTS) --without-headers > ../gcc1-configure.tmp.log 2>&1
+	mv gcc1-configure.tmp.log gcc1-configure.log
 
 gcc1-make.log: gcc1-configure.log
-	$(MAKE) all-gcc -C build-gcc > gcc1-make.log.tmp 2>&1
-	mv gcc1-make.log.tmp gcc1-make.log
+	$(MAKE) all-gcc -C build-gcc > gcc1-make.tmp.log 2>&1
+	mv gcc1-make.tmp.log gcc1-make.log
 
 gcc1-install.log: gcc1-make.log
-	$(INSTALLER) $(MAKE) install-gcc -C build-gcc > gcc1-install.log.tmp 2>&1
-	mv gcc1-install.log.tmp gcc1-install.log
+	$(INSTALLER) $(MAKE) install-gcc -C build-gcc > gcc1-install.tmp.log 2>&1
+	mv gcc1-install.tmp.log gcc1-install.log
 
 newlib-configure.log: $(NEWLIB_DIR) gcc1-install.log
 	mkdir -p build-newlib
 	echo NOT_USED: patch newlib-$(NEWLIB_VER)/libgloss/rs6000/Makefile.in patches/newlib/libgloss/rs6000/Makefile.in.patch  # Apply patch to remove references to removed xil-exit.c file.
 	cd build-newlib \
-	&& ../newlib-$(NEWLIB_VER)/configure --prefix=$(PREFIX) --target=$(TARGET) --enable-languages=$(ENABLE_LANGUAGES) > ../newlib-configure.log.tmp 2>&1
-	mv newlib-configure.log.tmp newlib-configure.log 
+	&& ../newlib-$(NEWLIB_VER)/configure --prefix=$(PREFIX) --target=$(TARGET) --enable-languages=$(ENABLE_LANGUAGES) > ../newlib-configure.tmp.log 2>&1
+	mv newlib-configure.tmp.log newlib-configure.log 
 
 newlib-make.log: newlib-configure.log
-	$(MAKE) all -C build-newlib > newlib-make.log.tmp 2>&1
-	mv newlib-make.log.tmp newlib-make.log
+	$(MAKE) all -C build-newlib > newlib-make.tmp.log 2>&1
+	mv newlib-make.tmp.log newlib-make.log
 
 newlib-install.log: newlib-make.log
-	$(INSTALLER) $(MAKE) install -C build-newlib > newlib-install.log.tmp 2>&1
-	mv newlib-install.log.tmp newlib-install.log
+	$(INSTALLER) $(MAKE) install -C build-newlib > newlib-install.tmp.log 2>&1
+	mv newlib-install.tmp.log newlib-install.log
 
 gcc2-configure.log: newlib-install.log
 	cd build-gcc \
-	&& ../$(GCC_DIR)/configure $(GCC_CONFIG_OPTS) > ../gcc2-configure.log.tmp 2>&1
-	mv gcc2-configure.log.tmp gcc2-configure.log
+	&& ../$(GCC_DIR)/configure $(GCC_CONFIG_OPTS) > ../gcc2-configure.tmp.log 2>&1
+	mv gcc2-configure.tmp.log gcc2-configure.log
 
 gcc2-make.log: gcc2-configure.log
-	$(MAKE) all -C build-gcc > gcc2-make.log.tmp 2>&1
-	mv gcc2-make.log.tmp gcc2-make.log
+	$(MAKE) all -C build-gcc > gcc2-make.tmp.log 2>&1
+	mv gcc2-make.tmp.log gcc2-make.log
 
 gcc2-install.log: gcc2-make.log
-	$(INSTALLER) $(MAKE) install -C build-gcc > gcc2-install.log.tmp 2>&1
-	mv gcc2-install.log.tmp gcc2-install.log
+	$(INSTALLER) $(MAKE) install -C build-gcc > gcc2-install.tmp.log 2>&1
+	mv gcc2-install.tmp.log gcc2-install.log
 
 .PHONY: clean
 clean:
@@ -220,7 +250,6 @@ clean:
 	-rm -rf build-gcc
 	-rm -rf build-newlib
 	-rm -rf *.log
-	-rm -rf *.log.tmp
 
 .PHONY: clean-all
 clean-all: clean
