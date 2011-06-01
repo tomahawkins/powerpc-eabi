@@ -121,7 +121,6 @@ $(NEWLIB_TARBALL):
 	./get_newlib $@
 
 $(NEWLIB_DIR): $(NEWLIB_TARBALL)
-	echo $(NEWLIB_DIR)
 	tar -xzmf $(NEWLIB_TARBALL)
 
 #######
