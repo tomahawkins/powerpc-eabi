@@ -257,7 +257,7 @@ clean-all: clean
 	-rm $(GCC_CPLUSPLUS_TARBALL)
 	-rm $(GCC_ADA_TARBALL)
 	-rm $(GMP_TARBALL)
-	-rm $(MPFR_TABALL)
+	-rm $(MPFR_TARBALL)
 	-rm $(MPC_TARBALL)
 	-rm $(NEWLIB_TARBALL)
 
