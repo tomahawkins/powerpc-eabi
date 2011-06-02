@@ -67,7 +67,8 @@ $(BINUTILS_TARBALL):
 	wget $(MIRROR)/binutils/$@
 
 $(BINUTILS_DIR): $(BINUTILS_TARBALL)
-	tar -xzmf $(BINUTILS_TARBALL)
+	tar -xzf $(BINUTILS_TARBALL)
+	touch $(BINUTILS_TARBALL)
 
 #########
 #  gmp  #
@@ -79,8 +80,9 @@ $(GMP_TARBALL):
 	wget $(MIRROR)/gmp/$@
 
 $(GMP_DIR): $(GMP_TARBALL)
-	tar -xzmf $(GMP_TARBALL)
+	tar -xzf $(GMP_TARBALL)
 	mv gmp-$(GMP_VER) $(GMP_DIR)
+	touch $(GIMP_DIR)
 	
 ##########
 #  mpfr  #
@@ -92,8 +94,9 @@ $(MPFR_TARBALL):
 	wget $(MIRROR)/mpfr/$@
 
 $(MPFR_DIR): $(MPFR_TARBALL)
-	tar -xzmf $(MPFR_TARBALL)
+	tar -xzf $(MPFR_TARBALL)
 	mv mpfr-$(MPFR_VER) $(MPFR_DIR)
+	touch $(MPFR_DIR)
 
 #########
 #  mpc  #
@@ -105,8 +108,9 @@ $(MPC_TARBALL):
 	wget http://www.multiprecision.org/mpc/download/$@
 
 $(MPC_DIR): $(MPC_TARBALL)
-	tar -xzmf $(MPC_TARBALL)
+	tar -xzf $(MPC_TARBALL)
 	mv mpc-$(MPC_VER) $(MPC_DIR)
+	touch $(MPC_DIR)
 	
 ############
 #  newlib  #
@@ -121,7 +125,8 @@ $(NEWLIB_TARBALL):
 	./get_newlib $@
 
 $(NEWLIB_DIR): $(NEWLIB_TARBALL)
-	tar -xzmf $(NEWLIB_TARBALL)
+	tar -xzf $(NEWLIB_TARBALL)
+	touch $(NEWLIB_DIR)
 
 #######
 #  c  #
@@ -132,7 +137,8 @@ $(GCC_CORE_TARBALL):
 	wget $(MIRROR)/gcc/$(GCC_DIR)/$@
 
 $(GCC_DIR): $(GCC_CORE_TARBALL)
-	tar -xzmf $(GCC_CORE_TARBALL)
+	tar -xzf $(GCC_CORE_TARBALL)
+	touch $(GCC_DIR)
 
 #########
 #  c++  #
@@ -145,7 +151,8 @@ $(GCC_CPLUSPLUS_TARBALL):
 	wget $(MIRROR)/gcc/$(GCC_DIR)/$@
 
 $(GCC_CPLUSPLUS_DIR): $(GCC_DIR) $(GCC_CPLUSPLUS_TARBALL)
-	tar -xzmf $(GCC_CPLUSPLUS_TARBALL)
+	tar -xzf $(GCC_CPLUSPLUS_TARBALL)
+	touch $(GCC_CPLUSPLUS_DIR)
 
 endif
 #########
@@ -167,7 +174,8 @@ $(GCC_ADA_TARBALL):
 	wget $(MIRROR)/gcc/$(GCC_DIR)/$@
 
 $(GCC_ADA_DIR): $(GCC_CORE_DIR) $(GCC_ADA_TARBALL)
-	tar -xzmf $(GCC_ADA_TARBALL)
+	tar -xzf $(GCC_ADA_TARBALL)
+	touch $(GCC_ADA_DIR)
 	$(prepare_ada)
 
 endif
