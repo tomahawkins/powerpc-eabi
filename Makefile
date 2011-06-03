@@ -82,7 +82,7 @@ $(GMP_TARBALL):
 $(GMP_DIR): $(GMP_TARBALL)
 	tar -xzf $(GMP_TARBALL)
 	mv gmp-$(GMP_VER) $(GMP_DIR)
-	touch $(GIMP_DIR)
+	touch $(GMP_DIR)
 	
 ##########
 #  mpfr  #
